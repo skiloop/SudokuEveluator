@@ -15,6 +15,9 @@ public class Cell {
      */
     private int value;
 
+    int mRow;
+    int mCol;
+
     /**
      * cell note
      */
@@ -23,6 +26,27 @@ public class Cell {
     public Cell(int capacity) {
         value = 0;
         note = new Note(capacity);
+    }
+
+    public Cell(int r, int c, int v) {
+        mRow = r;
+        mCol = c;
+        value = v;
+    }
+
+    public Cell(int r, int c, int capacity, int v) {
+        mRow = r;
+        mCol = c;
+        value = v;
+        note = new Note(capacity);
+    }
+
+    public int row() {
+        return mRow;
+    }
+
+    public int col() {
+        return mCol;
     }
 
     public boolean setValue(int v) {

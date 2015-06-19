@@ -1,5 +1,10 @@
 package com.shiloop.sudoku;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Created with IntelliJ IDEA
  * Author : skiloop@126.com
@@ -12,14 +17,14 @@ public class Sudoku {
     public static final int ROWS = 3;
     public static final int COLS = 3;
 
-    private Cell[][] cells = new Cell[SIZE][SIZE];
+    private final Cell[][] cells = new Cell[SIZE][SIZE];
 
     private int mZerosCount;
 
     private Sudoku() {
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                cells[r][c] = new Cell(SIZE);
+                cells[r][c] = new Cell(r, c, SIZE, 0);
             }
         }
         mZerosCount = SIZE * SIZE;
@@ -30,8 +35,7 @@ public class Sudoku {
         mZerosCount = SIZE * SIZE;
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
-                cells[r][c] = new Cell(SIZE);
-                cells[r][c].setValue(s.charAt(i) - '0');
+                cells[r][c] = new Cell(r, c, SIZE, s.charAt(i) - '0');
                 i++;
                 if (cells[r][c].getValue() != 0) mZerosCount--;
             }
@@ -39,20 +43,27 @@ public class Sudoku {
         validateNotes();
     }
 
-    public boolean setValue(int v, int r, int c) {
+    public boolean setValue(int r, int c, int v) {
         if (cells[r][c].getNotes().contains(v)) {
             int value = cells[r][c].getValue();
             cells[r][c].setValue(v);
             if (value == 0) {
                 mZerosCount--;
-            }
-            for (int i = 0; i < SIZE; i++) {
-                cells[r][c].removeNote(cells[r][i].getValue());
-                cells[r][c].removeNote(cells[i][c].getValue());
+                removeNotes(r, c, v);
             }
             return true;
         }
         return false;
+    }
+
+    private void removeNotes(int r, int c, int v) {
+        int sr = r / ROWS;
+        int sc = c / COLS;
+        for (int i = 0; i < SIZE; i++) {
+            cells[r][i].removeNote(v);
+            cells[i][c].removeNote(v);
+            cells[sr * ROWS + i / ROWS][sc * COLS + i % COLS].removeNote(v);
+        }
     }
 
     public int getZerosCount() {
@@ -68,13 +79,7 @@ public class Sudoku {
             for (int c = 0; c < SIZE; c++) {
                 int v = cells[r][c].getValue();
                 if (v == 0) continue;
-                int sr = r / ROWS;
-                int sc = c / COLS;
-                for (int i = 0; i < SIZE; i++) {
-                    cells[r][i].removeNote(v);
-                    cells[i][c].removeNote(v);
-                    cells[sr * ROWS + i / ROWS][sc * COLS + i % COLS].removeNote(v);
-                }
+                removeNotes(r, c, v);
             }
         }
     }
@@ -105,6 +110,114 @@ public class Sudoku {
         }
         return null;
     }
+
+    public static Set<Integer> valueSet() {
+        Set<Integer> set = new HashSet<>();
+        for (int i = 1; i <= SIZE; i++) {
+            set.add(i);
+        }
+        return set;
+    }
+
+    public Cell findHiddenSingleEmptyCell() {
+        Stats<Integer> stats = new Stats<>(valueSet());
+        // check row keys
+        for (int r = 0; r < SIZE; r++) {
+            stats.reset();
+            stats.increase(getRowNotes(r));
+            Integer key = stats.findKey(1);
+            if (key != null) {
+                Cell cell = findRowCell(r, key);
+                return new Cell(cell.row(), cell.col(), key);
+            }
+        }
+        // check col keys
+        for (int c = 0; c < SIZE; c++) {
+            stats.reset();
+            stats.increase(getColNotes(c));
+            Integer key = stats.findKey(1);
+            if (key != null) {
+                Cell cell = findColCell(c, key);
+                return new Cell(cell.row(), cell.col(), key);
+            }
+        }
+        // find section keys
+        for (int sr = 0; sr < ROWS; sr++) {
+            for (int sc = 0; sc < COLS; sc++) {
+                stats.reset();
+                stats.increase(getSectionNotes(sr, sc));
+                Integer key = stats.findKey(1);
+                if (key != null) {
+                    Cell cell = findSectionCell(sr, sc, key);
+                    return new Cell(cell.row(), cell.col(), key);
+                }
+            }
+        }
+        return null;
+    }
+
+    public Cell findRowCell(int r, int note) {
+        for (int i = 0; i < SIZE; i++) {
+            if (cells[r][i].isEmpty() && cells[r][i].getNotes().contains(note)) {
+                return cells[r][i];
+            }
+        }
+        return null;
+    }
+
+    public Cell findColCell(int c, int note) {
+        for (int i = 0; i < SIZE; i++) {
+            if (cells[i][c].isEmpty() && cells[i][c].getNotes().contains(note)) {
+                return cells[i][c];
+            }
+        }
+        return null;
+    }
+
+    public Cell findSectionCell(int sr, int sc, int note) {
+        for (int i = 0; i < SIZE; i++) {
+            int ri = sr + i % ROWS;
+            int ci = sc + i / COLS;
+            if (cells[ri][ci].isEmpty() && cells[ri][ci].getNotes().contains(note)) {
+                return cells[ri][ci];
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Integer> getRowNotes(int r) {
+        ArrayList<Integer> notes = new ArrayList<>();
+        for (int c = 0; c < SIZE; c++) {
+            if (cells[r][c].isEmpty()) {
+                notes.addAll(cells[r][c].getNotes());
+            }
+        }
+        return notes;
+    }
+
+    public ArrayList<Integer> getColNotes(int c) {
+        ArrayList<Integer> notes = new ArrayList<>();
+        for (int r = 0; r < SIZE; r++) {
+            if (cells[r][c].isEmpty()) {
+                notes.addAll(cells[r][c].getNotes());
+            }
+        }
+        return notes;
+    }
+
+
+    public ArrayList<Integer> getSectionNotes(int sr, int sc) {
+        ArrayList<Integer> notes = new ArrayList<>();
+        for (int i = 0; i < SIZE; i++) {
+            int ri = sr + i % ROWS;
+            int ci = sc + i / COLS;
+            if (cells[ri][ci].isEmpty()) {
+                notes.addAll(cells[ri][ci].getNotes());
+            }
+        }
+        return notes;
+    }
+
 
     public void printNotes() {
         int v = 1; // 当前数字
@@ -164,42 +277,14 @@ public class Sudoku {
         }
     }
 
-    public void printNotes2() {
-        int r = 0;
-        int rn = 0;// 行重复次数
-        int rv = 1;//行开头的数字
-        while (rn < ROWS) {
-            int c = 0;
-            int cn = 0;//列重复次数
-            int cv = rv;// 列打头数字
-            while (cn < COLS) {
-                if (cells[r][c].getNotes().contains(cv)) {
-                    System.out.print(cv);
-                } else {
-                    System.out.print(0);
-                }
-                // 输出列分割字符
-                if (c == SIZE - 1 && cn != COLS - 1) {
-                    System.out.print("|");
-                } else if ((c + 1) % COLS == 0) {
-                    System.out.print(" ");
-                }
-                c = (c + 1) % SIZE;
-                cn += c == 0 ? 1 : 0;
-                cv = (cv + 1 - rv) % COLS + rv;
+    public boolean solve() {
+        while (!isCompleted()) {
+            Cell cell = findSingleNoteEmptyCell();
+            if (null == cell) break;
+            if (!setValue(cell.row(), cell.col(), cell.getNotes().iterator().next())) {
+                break;
             }
-            // 换行
-            System.out.println();
-            // 输出分割行
-            if (r == SIZE - 1 && rn != ROWS - 1) {
-                System.out.println("===================================");
-            } else if ((r + 1) % ROWS == 0 && (r + 1) != SIZE) {
-                System.out.println("-----------|-----------|-----------");
-            }
-            rv += ROWS;
-            rv %= SIZE;
-            r = (r + 1) % SIZE;
-            rn += (r == 0 ? 1 : 0);
         }
+        return isCompleted();
     }
 }

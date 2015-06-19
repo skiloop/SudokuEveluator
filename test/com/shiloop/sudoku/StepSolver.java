@@ -1,7 +1,6 @@
 package com.shiloop.sudoku;
 
 import com.shiloop.sudoku.fetcher.Fetcher;
-import com.shiloop.sudoku.fetcher.HttpFetcher;
 import com.shiloop.sudoku.model.SudokuPuzzle;
 
 import java.util.Set;
@@ -21,13 +20,35 @@ public class StepSolver {
         for (SudokuPuzzle puzzle : puzzles) {
             System.out.println("" + puzzle.getId() + "\t" + puzzle.getContent());
         }
-        CandidatesSolver solver = new CandidatesSolver();
         int count = 0;
         for (SudokuPuzzle puzzle : puzzles) {
             if (!puzzle.isOpen()) {
-                boolean solved = solver.solve(new Sudoku(puzzle.getContent()));
+                Sudoku sudoku = new Sudoku(puzzle.getContent());
+                boolean solved = sudoku.solve();
                 if (solved) {
-                    System.out.println("" + puzzle.getId());
+                    System.out.println("" + puzzle.getId() + ",");
+                    count++;
+                }
+            }
+        }
+        System.out.println("solved count:" + count);
+    }
+
+    public void hiddenSingleAll() {
+        Fetcher fetcher = Fetcher.newInstance("http://s.shiloop.com/s/");
+        Set<SudokuPuzzle> puzzles = fetcher.loadPuzzles(0);
+        System.out.println("puzzle count:" + puzzles.size());
+        Solver solver = new HiddenSingleSolver();
+        for (SudokuPuzzle puzzle : puzzles) {
+            System.out.println("" + puzzle.getId() + "\t" + puzzle.getContent());
+        }
+        int count = 0;
+        for (SudokuPuzzle puzzle : puzzles) {
+            if (!puzzle.isOpen() && puzzle.getLevel() > 1) {
+                Sudoku sudoku = new Sudoku(puzzle.getContent());
+                boolean solved = solver.solve(sudoku);
+                if (solved) {
+                    System.out.println("" + puzzle.getId() + ",");
                     count++;
                 }
             }
@@ -37,13 +58,26 @@ public class StepSolver {
 
     public void solveTest() {
         Sudoku sudoku = new Sudoku("700400900954006210102007000000100605047300129003002004380500470076000590095003061");
-        CandidatesSolver solver = new CandidatesSolver();
+        SingleSolver solver = new SingleSolver();
         boolean solved = solver.solve(sudoku);
         System.out.println(solved);
+        sudoku.print();
+        System.out.println();
+        sudoku.printNotes();
+    }
+
+    public void hiddenSingle() {
+        Sudoku sudoku = new Sudoku("700400900954006210102007000000100605047300129003002004380500470076000590095003061");
+        Solver solver = new HiddenSingleSolver();
+        boolean solved = solver.solve(sudoku);
+        System.out.println(solved);
+        sudoku.print();
+        System.out.println();
+        sudoku.printNotes();
     }
 
     public static void main(String[] args) {
         StepSolver solver = new StepSolver();
-        solver.solveTest();
+        solver.hiddenSingleAll();
     }
 }

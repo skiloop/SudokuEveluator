@@ -7,7 +7,7 @@ package com.shiloop.sudoku;
  * Project: SudokuEveluator
  * Description:
  */
-public class CandidatesSolver extends Solver {
+public class SingleSolver extends Solver {
 
     @Override
     public boolean solve(Sudoku sudoku) {
@@ -15,7 +15,10 @@ public class CandidatesSolver extends Solver {
         while (!sudoku.isCompleted()) {
             Cell cell = sudoku.findSingleNoteEmptyCell();
             if (null == cell) break;
-            cell.setValue(cell.getNotes().iterator().next());
+            System.out.println("" + cell.row() + "\t" + cell.col() + "\t" + cell.getValue() + "\t" + cell.getNotes().iterator().next());
+            if (!sudoku.setValue(cell.row(), cell.col(), cell.getNotes().iterator().next())) {
+                break;
+            }
         }
         return sudoku.isCompleted();
     }
