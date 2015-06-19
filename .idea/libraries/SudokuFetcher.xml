@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="SudokuFetcher">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../SudokuFetcher/out/artifacts/SudokuFetcher_jar/SudokuFetcher.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

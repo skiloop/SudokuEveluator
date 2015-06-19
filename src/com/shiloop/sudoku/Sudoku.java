@@ -14,24 +14,53 @@ public class Sudoku {
 
     private Cell[][] cells = new Cell[SIZE][SIZE];
 
+    private int mZerosCount;
+
     private Sudoku() {
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
                 cells[r][c] = new Cell(SIZE);
             }
         }
+        mZerosCount = SIZE * SIZE;
     }
 
     public Sudoku(String s) {
         int i = 0;
+        mZerosCount = SIZE * SIZE;
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
                 cells[r][c] = new Cell(SIZE);
                 cells[r][c].setValue(s.charAt(i) - '0');
                 i++;
+                if (cells[r][c].getValue() != 0) mZerosCount--;
             }
         }
         validateNotes();
+    }
+
+    public boolean setValue(int v, int r, int c) {
+        if (cells[r][c].getNotes().contains(v)) {
+            int value = cells[r][c].getValue();
+            cells[r][c].setValue(v);
+            if (value == 0) {
+                mZerosCount--;
+            }
+            for (int i = 0; i < SIZE; i++) {
+                cells[r][c].removeNote(cells[r][i].getValue());
+                cells[r][c].removeNote(cells[i][c].getValue());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public int getZerosCount() {
+        return mZerosCount;
+    }
+
+    public boolean isCompleted() {
+        return getZerosCount() <= 0;
     }
 
     private void validateNotes() {
@@ -77,6 +106,17 @@ public class Sudoku {
             }
 
         }
+    }
+
+    public Cell findSingleNoteEmptyCell() {
+        for (int r = 0; r < SIZE; r++) {
+            for (Cell cell : cells[r]) {
+                if (cell.isEmpty() && cell.getNotes().size() == 1) {
+                    return cell;
+                }
+            }
+        }
+        return null;
     }
 
     public void printNotes() {

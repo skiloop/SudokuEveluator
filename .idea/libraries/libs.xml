@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="libs">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../SudokuFetcher/libs/SudokuEncrypt-0.0.1-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../SudokuFetcher/libs/SudokuStandardAPI-0.0.1-SNAPSHOT.jar!/" />
+      <root url="jar://$PROJECT_DIR$/../SudokuFetcher/libs/mysql-connector-java-5.0.8-bin.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

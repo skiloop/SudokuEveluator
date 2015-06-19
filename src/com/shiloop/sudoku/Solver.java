@@ -8,15 +8,8 @@ package com.shiloop.sudoku;
  * Description:
  */
 public abstract class Solver {
-    Sudoku mSudoku;
 
-    public Solver(Sudoku sudoku) {
-        mSudoku = sudoku;
-    }
 
-    public Solver(String sudoku) {
-        mSudoku = new Sudoku(sudoku);
-    }
+    public abstract boolean solve(Sudoku sudoku);
 
-    public abstract void solve();
 }

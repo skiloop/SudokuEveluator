@@ -48,4 +48,8 @@ public class Cell {
     public int getValue() {
         return value;
     }
+
+    public boolean isEmpty() {
+        return getValue() == 0;
+    }
 }
