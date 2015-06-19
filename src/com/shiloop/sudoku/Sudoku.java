@@ -66,27 +66,14 @@ public class Sudoku {
     private void validateNotes() {
         for (int r = 0; r < SIZE; r++) {
             for (int c = 0; c < SIZE; c++) {
+                int v = cells[r][c].getValue();
+                if (v == 0) continue;
+                int sr = r / ROWS;
+                int sc = c / COLS;
                 for (int i = 0; i < SIZE; i++) {
-                    cells[r][c].removeNote(cells[r][i].getValue());
-                    cells[r][c].removeNote(cells[i][c].getValue());
-                }
-            }
-        }
-
-        for (int sr = 0; sr < ROWS; sr++) {
-            for (int sc = 0; sc < COLS; sc++) {
-                int rn = sr * ROWS;
-                int cn = sc * COLS;
-                for (int r = 0; r < ROWS; r++) {
-                    for (int c = 0; c < COLS; c++) {
-                        int ir = rn + r;
-                        int ic = cn + c;
-                        for (int ri = 0; ri < ROWS; ri++) {
-                            for (int ci = 0; ci < COLS; ci++) {
-                                cells[ir][ic].removeNote(cells[rn + r][cn + c].getValue());
-                            }
-                        }
-                    }
+                    cells[r][i].removeNote(v);
+                    cells[i][c].removeNote(v);
+                    cells[sr * ROWS + i / ROWS][sc * COLS + i % COLS].removeNote(v);
                 }
             }
         }
@@ -120,6 +107,64 @@ public class Sudoku {
     }
 
     public void printNotes() {
+        int v = 1; // 当前数字
+        int r = 0;// 当前输出行
+        int c = 0;// 当前输出列
+        int rv = 1;// 行基数，本行行首的站位数
+//        int nr;// 当前note行
+//        int nc;// 当前note列
+        int pr = 0;//当前屏幕打印行
+        int pc;//当前屏幕打印列
+        int printRowCount = SIZE * ROWS + 8;
+        int printColCount = SIZE * COLS + 8;
+        while (pr < printRowCount) {
+            pc = 0;
+            c = 0;
+            // 打印第pr行
+            if ((pr + 1) % (ROWS + 1) != 0) {
+                // 打印数字行
+                v = rv;
+                while (pc < printColCount) {
+                    if ((pc + 1) % (COLS + 1) != 0) {
+                        // 打印数字
+                        System.out.print(cells[r][c].getNotes().contains(v) ? v : 0);
+//                        System.out.print(cells[r][c].getValue());
+                        v++;
+                    } else if ((pc + 1) % (SIZE + COLS) == 0) {
+                        // 打印分区分割线
+                        System.out.print('|');
+                        c++;
+                        v = rv;
+                    } else {
+                        // 打印数字分隔符
+                        System.out.print(' ');
+                        c++;
+                        v = rv;
+                    }
+                    pc++;
+                }
+                rv += ROWS;
+                if (rv > SIZE) rv = 1;
+            } else {
+                // 打印分隔行
+                while (pc < printColCount) {
+                    if ((pc + 1) % (SIZE + COLS) == 0) {
+                        // 打印分区分割线
+                        System.out.print('|');
+                    } else {
+                        // 打印数字分隔符
+                        System.out.print((pr + 1) % (SIZE + ROWS) == 0 ? '=' : '-');
+                    }
+                    pc++;
+                }
+                r++;
+            }
+            System.out.println();
+            pr++;
+        }
+    }
+
+    public void printNotes2() {
         int r = 0;
         int rn = 0;// 行重复次数
         int rv = 1;//行开头的数字

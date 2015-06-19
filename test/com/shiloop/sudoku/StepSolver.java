@@ -14,10 +14,13 @@ import java.util.Set;
  * Description:
  */
 public class StepSolver {
-    public static void main(String[] args) {
+    public void solveAll() {
         Fetcher fetcher = Fetcher.newInstance("http://s.shiloop.com/s/");
         Set<SudokuPuzzle> puzzles = fetcher.loadPuzzles(0);
         System.out.println("puzzle count:" + puzzles.size());
+        for (SudokuPuzzle puzzle : puzzles) {
+            System.out.println("" + puzzle.getId() + "\t" + puzzle.getContent());
+        }
         CandidatesSolver solver = new CandidatesSolver();
         int count = 0;
         for (SudokuPuzzle puzzle : puzzles) {
@@ -30,5 +33,17 @@ public class StepSolver {
             }
         }
         System.out.println("solved count:" + count);
+    }
+
+    public void solveTest() {
+        Sudoku sudoku = new Sudoku("700400900954006210102007000000100605047300129003002004380500470076000590095003061");
+        CandidatesSolver solver = new CandidatesSolver();
+        boolean solved = solver.solve(sudoku);
+        System.out.println(solved);
+    }
+
+    public static void main(String[] args) {
+        StepSolver solver = new StepSolver();
+        solver.solveTest();
     }
 }

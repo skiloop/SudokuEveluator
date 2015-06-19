@@ -9,7 +9,7 @@ package com.shiloop.sudoku;
  */
 public class SudokuTest {
     public static void main(String[] args) {
-        String data = "000000102005200804010090060750062000006300000130049000020050070007400503000000209";
+        String data = "700400900954006210102007000000100605047300129003002004380500470076000590095003061";
         Sudoku s = new Sudoku(data);
         s.print();
         System.out.println("Notes:");
